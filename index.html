@@ -65,6 +65,12 @@
 	<button class="button extra" onclick="selectOption('Decaff', 'extra', this)">Decaff</button>
        
         <div class="controls">
+            <button class="button full-width" id="exportBtn" onclick="exportData()">Export Data</button>
+            <button class="button full-width" id="exportBtn" onclick="exportCoffeeLists()">Export JSON File. DO NOT USE</button>
+            <button class="button full-width" id="uploadBtn" onclick="triggerFileInput()">Upload Coffee Lists. DO NOT USE</button>
+            <input type="file" id="fileInput" style="display: none;" onchange="uploadCoffeeLists(event)" />
+            
+
         </div>
         <p class="copyright">&copy; 2024 Luiz Smania (@luizsmania). All rights reserved.<br>This website is for personal use only and may not be used for commercial purposes, sales, or redistribution without explicit permission.</p>
     </div>
