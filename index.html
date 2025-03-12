@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Tracker</title>
+    <link rel="icon" type="image/x-icon" href="./images/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton+SC&family=Bona+Nova+SC:ital,wght@0,400;0,700;1,400&family=Playwrite+GB+S:ital,wght@0,100..400;1,100..400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js"></script>
+</head>
+<body>
+
+    <div class="api_info">
+        <p id="weather-info">Loading weather...</p>
+        <div id="conversionRate">Fetching conversion rate...</div><div id="trendSymbol"></div>
+        
+    </div>
+    
+
+    <div class="options">
+        <div class="header">
+            <a class="patches" href="patchnote.html"><img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.signsallsigns.com%2Fwp-content%2Fuploads%2F2019%2F03%2Famazon-logo-transparent.png&f=1&nofb=1&ipt=f3ed8ce4ad037f34a2f8ae294bd969c132d728d4ceaa97c47a38131038090b66&ipo=images" alt="Amazon Logo" class="amazon-logo"></a>
+            
+            <img src="https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fwww.pngmart.com%2Ffiles%2F1%2FCoffee-Logo-PNG-Image.png&f=1&nofb=1&ipt=060cedd1d0d1ea28beaf8997e0af5e13c0c676ae5f14187fe35603355c650535&ipo=images" alt="Amazon Logo" class="coffee-logo">
+            <h3 class="dub19">DUB 19 Downstairs Coffee Tracker </h3>
+        </div>
+        <h2>Select Coffee Type</h2>
+            <button class="button coffee" onclick="selectOption('Americano', 'coffee', this)">Americano</button>
+            <button class="button coffee" onclick="selectOption('Small Americano', 'coffee', this)">Small Americano</button>
+            <button class="button coffee" onclick="selectOption('Latte', 'coffee', this)">Latte</button>
+            <button class="button coffee" onclick="selectOption('Cappuccino', 'coffee', this)">Cappuccino</button>
+            <button class="button coffee" onclick="selectOption('Flat White', 'coffee', this)">Flat White</button>
+            <button class="button coffee" onclick="selectOption('Cortado', 'coffee', this)">Cortado</button>
+            <button class="button coffee" onclick="selectOption('Double Espresso', 'coffee', this)">Double Espresso</button>
+            <button class="button coffee" onclick="selectOption('Single Espresso', 'coffee', this)">Single Espresso</button>
+            <button class="button coffee" onclick="selectOption('Matcha Latte', 'coffee', this)">Matcha Latte</button>
+            <button class="button coffee" onclick="selectOption('Chai Latte', 'coffee', this)">Chai Latte</button>
+            <button class="button coffee" onclick="selectOption('Hot Chocolate', 'coffee', this)">Hot Chocolate</button>
+            <button class="button coffee" onclick="selectOption('Mocha', 'coffee', this)">Mocha</button>
+            <button class="button coffee" onclick="selectOption('Tea', 'coffee', this)">Tea</button>
+            <button class="button coffee" onclick="selectOption('Macchiato', 'coffee', this)">Macchiato</button>
+            <button class="button coffee" onclick="selectOption('Iced Latte', 'coffee', this)">Iced Latte</button>
+            <button class="button coffee" onclick="selectOption('Iced Americano', 'coffee', this)">Iced Americano</button>
+            <button class="button coffee" onclick="selectOption('Vietnamese', 'coffee', this)">Vietnamese</button>
+            <button class="button coffee" onclick="selectOption('Special Coffee', 'coffee', this)">Special Coffee</button>
+
+
+        <h2>Select Milk Type (Optional)</h2>
+        <button class="button milk" onclick="selectOption('Oat Milk', 'milk', this)">Oat Milk</button>
+        <button class="button milk" onclick="selectOption('Coconut Milk', 'milk', this)">Coconut Milk</button>
+	    <button class="button milk" onclick="selectOption('Almond Milk', 'milk', this)">Almond Milk</button>
+        <!-- Add other milk buttons similarly -->
+        <h2>Select Syrup (Optional)</h2>
+        <button class="button syrup" onclick="selectOption('Caramel', 'syrup', this)">Caramel</button>
+        <button class="button syrup" onclick="selectOption('Hazelnut', 'syrup', this)">Hazelnut</button>
+	    <button class="button syrup" onclick="selectOption('Vanilla', 'syrup', this)">Vanilla</button>
+	    <button class="button syrup" onclick="selectOption('Salted Caramel', 'syrup', this)">Salted Caramel</button>
+	    <button class="button syrup" onclick="selectOption('Pumpkin Spice', 'syrup', this)">Pumpkin Spice</button>
+        <!-- Add other syrup buttons similarly -->
+        <h2>Select Extras (Optional)</h2>
+        <button class="button extra" onclick="selectOption('Extra Shot', 'extra', this)">Extra Shot</button>
+	<button class="button extra" onclick="selectOption('Decaff', 'extra', this)">Decaff</button>
+       
+        <div class="controls">
+        </div>
+        <p class="copyright">&copy; 2024 Luiz Smania (@luizsmania). All rights reserved.<br>This website is for personal use only and may not be used for commercial purposes, sales, or redistribution without explicit permission.</p>
+    </div>
+    
+    <div class="recent-coffees">
+        <label for="dateDropdown">Choose Date:</label>
+        <select id="dateDropdown" onchange="changeDate(event)">
+            <!-- Options will be populated here -->
+        </select>
+        <p id="oldListMessage" class="oldListMessage" style="color: red; display: none;">Looks like you're checking out yesterday's coffee run. Switch to today's date to see the fresh brew!</p>
+        <button id="added" class="button full-width" onclick="addCoffee()">Enter</button>
+        <h2 id="coffeeCount">Recent Coffees - Total: 0</h2>
+        <ul id="coffeeList"></ul>
+    </div>
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js"></script>
+    
+    <script type="module" src="firebase.js"></script>
+
+</body>
+</html>

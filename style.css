@@ -1,0 +1,201 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    background-color: rgba(255, 214, 144, 0.45);
+}
+.options {
+    width: 80%; /* 60% for the left side (coffee options) */
+    font-family: 'Courier New', Courier, monospace;
+}
+.recent-coffees {
+    font-size: 0.8em;
+    width: 25%; /* 30% for the right side (recent list) */
+    border-left: 2px solid #ddd;
+    padding-left: 0px;
+    font-family: "Playwrite GB S";
+}
+.button {
+    display: inline-block; /* For two buttons side by side */
+    width: 31%; /* Adjust to fit side by side */
+    padding: 15px;
+    margin: 5px;
+    margin-right: 10px;
+    height: 4em;
+    font-size: 30px;
+    cursor: pointer;
+    text-align: center;
+    background-color: #dddddd; /* Default button color */
+    color: rgb(0, 0, 0);
+    border: none;
+    border-radius: 5px;
+    font-family: "Playwrite GB S";
+    transition: background-color 1.2s ease; /* Smooth transition for background-color */
+}
+
+.button.selected {
+    background-color: #f39e0079; /* Orange when selected */
+}
+.button.full-width {
+    width: 98%; /* Full width for 'Enter' button */
+    margin: 10px 0;
+}
+.controls {
+    margin-top: 30px;
+}
+h2 {
+    font-size: 30px;
+    margin-top: 30px;
+}
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+li {
+    margin: 10px 0;
+    font-size: 18px;
+}
+
+/* General styling for the coffee list items */
+#coffeeList li {
+    margin: 15px 0;
+    margin-left: 7px;
+    padding: 5px;
+    font-size: 1.7vw;
+    line-height: 1.5;
+    border-radius: 10px;
+    background-color: rgba(255, 202, 111, 0.26);
+}
+
+/* Styling for the container holding coffee, milk, and syrup */
+#coffeeList div {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px; /* Space below the coffee details */
+}
+
+/* Styling for individual details within the container */
+#coffeeList span:not(.time) {
+    display: inline; /* Keep all details on the same line */
+    margin-left: 3px; /* Space between details */
+}
+
+.copyright {
+    font-size: 20px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 0px;
+    margin-top: -60px;
+}
+
+.dub19 {
+    font-size: 100px;
+}
+
+.amazon-logo {
+    max-width: 150px;
+    margin-bottom: -50px;
+}
+.coffee-logo {
+    max-width: 50px;
+    margin-bottom: 0px;
+}
+
+.header h1 {
+    font-size: 36px;
+    margin: 0;
+}
+
+.header h3 {
+    font-size: 25px;
+    color: #555;
+    margin-top: 0;
+}
+.options, .recent-coffees {
+    margin-top: 20px;
+}
+#weather-info {
+    font-size: 23px;
+    color: rgba(0, 0, 0, 0.5);
+}
+#conversionRate {
+    margin-top: -20px;
+    font-size: 23px;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.api_info {
+    position: absolute;
+    margin-top: -45px;
+    margin-left: -15px;
+    font-size: px;
+}
+
+.coffeetime {
+    position: absolute;
+    z-index: 1;
+    margin-top: 15%;
+    margin-left: -10%;
+    width: 1300px;
+    height: auto;
+    visibility: ;
+}
+
+select#dateDropdown {
+    width: 98%; /* Match the full width of the button */
+    padding: 15px; /* Match padding */
+    font-size: 18px; /* Match font size */
+    cursor: pointer; /* Change cursor to pointer */
+    background-color: #dddddd; /* Default background color */
+    color: rgb(0, 0, 0); /* Text color */
+    border: none; /* No border */
+    border-radius: 5px; /* Rounded corners */
+    margin: 10px 0; /* Margin similar to button */
+    font-family: 'Courier New', Courier, monospace;
+}
+
+select#dateDropdown:focus {
+    outline: none; /* Remove outline when focused */
+    background-color: #f39e0079; /* Change background color on focus */
+}
+
+label {
+    font-size: 22px; /* Adjust as needed */
+    margin-right: 10px; /* Space between label and dropdown */
+    color: #000000; /* Color of the label text */
+    font-family: 'Courier New', Courier, monospace;
+}
+
+
+.class {
+    font-size: 15px;
+}
+
+.oldListMessage p{
+    font-size: 30px;
+
+}
+
+#coffeeCount {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 25px;
+}
+
+.api_info {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 600;
+}
+
+.patches {
+    text-decoration: none;
+    color: inherit;
+    font-size: 10px;
+}
+
+.mainpage {
+    color: blue;
+    font-size: 25px;
+}
