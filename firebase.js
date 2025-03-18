@@ -88,4 +88,44 @@ export function exportData() {
     console.log('Exported data:', jsonData);
 }
 
-document.getElementById('added').addEventListener('click', exportData);
+
+function scheduleExportData() {
+  const now = new Date();
+  const startHour = 7;
+  const endHour = 17;
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+
+  let nextRunTime;
+
+  if (currentHour < startHour) {
+      nextRunTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startHour, 0, 0, 0);
+  } else if (currentHour >= endHour) {
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
+      nextRunTime = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), startHour, 0, 0, 0);
+  } else {
+      const minutesSinceStart = (currentHour - startHour) * 60 + currentMinute;
+      const nextRunMinutes = Math.ceil(minutesSinceStart / 30) * 30;
+      const nextRunHour = startHour + Math.floor(nextRunMinutes / 60);
+      const nextRunMinute = nextRunMinutes % 60;
+      nextRunTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), nextRunHour, nextRunMinute, 0, 0);
+      if(nextRunTime.getHours() >= endHour){
+          const tomorrow = new Date(now);
+          tomorrow.setDate(now.getDate() + 1);
+          nextRunTime = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), startHour, 0, 0, 0);
+      }
+  }
+
+  const delay = nextRunTime - now;
+
+  setTimeout(() => {
+      exportData();
+      scheduleExportData();
+  }, delay);
+
+  console.log("Next exportData scheduled for:", nextRunTime);
+}
+
+// Start the scheduling
+scheduleExportData();
