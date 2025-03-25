@@ -20,96 +20,105 @@ const db = getFirestore(app);  // Obtenha a referência do Firestore
 const analytics = getAnalytics(app);
 
 export function exportData() {
-  let today = new Date();
-  let formattedToday = today.toLocaleDateString('en-GB'); // Gera "DD/MM/YYYY"
+    let allData = {};
 
-  let allData = {};
+    // Get all available dates from localStorage
+    const allDates = Object.keys(localStorage)
+      .filter(key => key.startsWith('coffeeList_'))
+      .map(key => key.replace('coffeeList_', ''));
 
-  // Verifica se há dados do dia atual no localStorage
-  const coffeeListString = localStorage.getItem(`coffeeList_${formattedToday}`);
+    console.log("Available dates in localStorage:", allDates);
 
-  if (!coffeeListString) {
-      console.log(`Nenhuma lista de café encontrada para hoje (${formattedToday}).`);
+    if (allDates.length === 0) {
+      console.log("No coffee lists found in localStorage.");
       return;
-  }
+    }
 
-  const coffeeList = JSON.parse(coffeeListString);
-  console.log(`Coffee List for today (${formattedToday}):`, coffeeList);
+    allDates.forEach(date => {
+      const coffeeListString = localStorage.getItem(`coffeeList_${date}`);
 
-  let coffeeCount = {};
-  let milkCount = {};
-  let syrupCount = {};
-  let extraCount = {};
+      if (coffeeListString) {
+        const coffeeList = JSON.parse(coffeeListString);
+        console.log(`Coffee List for ${date}:`, coffeeList);
 
-  coffeeList.forEach(function (row) {
-      if (row.coffee !== 'No Coffee Selected') {
-          coffeeCount[row.coffee] = (coffeeCount[row.coffee] || 0) + 1;
-      }
-      if (row.milk !== 'Regular Milk') {
-          milkCount[row.milk] = (milkCount[row.milk] || 0) + 1;
-      }
-      if (row.syrup !== 'No Syrup') {
-          syrupCount[row.syrup] = (syrupCount[row.syrup] || 0) + 1;
-      }
-      if (row.extra !== 'No Extra') {
-          extraCount[row.extra] = (extraCount[row.extra] || 0) + 1;
-      }
-  });
+        let coffeeCount = {};
+        let milkCount = {};
+        let syrupCount = {};
+        let extraCount = {};
 
-  allData[formattedToday] = { coffeeCount, milkCount, syrupCount, extraCount };
-
-  // Atualiza Firestore sem apagar os dados antigos
-  const coffeeLogsRef = doc(db, "coffee_logs", "dub19downstairs_coffee_logs");
-
-  getDoc(coffeeLogsRef)
-      .then((docSnap) => {
-          if (docSnap.exists()) {
-              let previousData = docSnap.data().logs || {};
-              let updatedData = { ...previousData, ...allData }; // Mantém dados antigos e adiciona os novos
-
-              return setDoc(coffeeLogsRef, { logs: updatedData });
-          } else {
-              return setDoc(coffeeLogsRef, { logs: allData }); // Cria novo documento caso não exista
+        coffeeList.forEach(function (row) {
+          if (row.coffee !== 'No Coffee Selected') {
+            coffeeCount[row.coffee] = (coffeeCount[row.coffee] || 0) + 1;
           }
-      })
-      .then(() => console.log("Dados de hoje enviados para o Firestore"))
-      .catch((error) => console.error("Erro ao enviar para o Firestore:", error));
+          if (row.milk !== 'Regular Milk') {
+            milkCount[row.milk] = (milkCount[row.milk] || 0) + 1;
+          }
+          if (row.syrup !== 'No Syrup') {
+            syrupCount[row.syrup] = (syrupCount[row.syrup] || 0) + 1;
+          }
+          if (row.extra !== 'No Extra') {
+            extraCount[row.extra] = (extraCount[row.extra] || 0) + 1;
+          }
+        });
+
+        // Add the data for each date to the allData object
+        allData[date] = { coffeeCount, milkCount, syrupCount, extraCount };
+
+      } else {
+        console.log(`No valid coffee list found for date: ${date}`);
+      }
+    });
+
+    // Update Firestore with all logs in a single document
+    if (Object.keys(allData).length > 0) {
+      const coffeeLogsRef = doc(db, "coffee_logs", "dub19downstairs_coffee_logs"); // Single document named 'coffee_logs'
+      setDoc(coffeeLogsRef, { logs: allData })
+        .then(() => console.log("All data uploaded to Firestore"))
+        .catch((error) => console.error("Error uploading to Firestore:", error));
+    }
+
+    // Convert the allData object to a JSON string
+    const jsonData = JSON.stringify(allData, null, 2);
+
+    // Create a link to download the JSON file
+    const blob = new Blob([jsonData], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.click();
+
+    console.log('Exported data:', jsonData);
 }
-
-
 
 function scheduleExportData() {
-  const now = new Date();
-  const startHour = 7;
-  const endHour = 17;
-  const currentHour = now.getHours();
-  const currentMinute = now.getMinutes();
-
-  let nextRunTime;
-
-  if (currentHour < startHour || (currentHour === startHour && currentMinute < 15)) {
-      // If before start time or before 7:15, schedule for 7:15
-      nextRunTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startHour, 15, 0, 0);
-  } else if (currentHour >= endHour && currentMinute >= 15) {
-      // If after last scheduled time (17:15), schedule for next day's 7:15
-      const tomorrow = new Date(now);
-      tomorrow.setDate(now.getDate() + 1);
-      nextRunTime = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), startHour, 15, 0, 0);
-  } else {
-      // Schedule for the next hour's 15th minute
-      nextRunTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), currentHour + 1, 15, 0, 0);
+    const now = new Date();
+    const startHour = 7;
+    const endHour = 17;
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+  
+    let nextRunTime;
+  
+    if (currentHour < startHour || (currentHour === startHour && currentMinute < 15)) {
+        // If before start time or before 7:15, schedule for 7:15
+        nextRunTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startHour, 15, 0, 0);
+    } else if (currentHour >= endHour && currentMinute >= 15) {
+        // If after last scheduled time (17:15), schedule for next day's 7:15
+        const tomorrow = new Date(now);
+        tomorrow.setDate(now.getDate() + 1);
+        nextRunTime = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), startHour, 15, 0, 0);
+    } else {
+        // Schedule for the next hour's 15th minute
+        nextRunTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), currentHour + 1, 15, 0, 0);
+    }
+  
+    const delay = nextRunTime - now;
+  
+    setTimeout(() => {
+        exportData();
+        scheduleExportData(); // Re-run function for next scheduled time
+    }, delay);
+  
+    console.log("Next exportData scheduled for:", nextRunTime);
   }
-
-  const delay = nextRunTime - now;
-
-  setTimeout(() => {
-      exportData();
-      scheduleExportData(); // Re-run function for next scheduled time
-  }, delay);
-
-  console.log("Next exportData scheduled for:", nextRunTime);
-}
-
 
 // Start the scheduling
 scheduleExportData();
