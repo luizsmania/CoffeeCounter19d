@@ -59,7 +59,7 @@ export function exportData() {
   allData[formattedToday] = { coffeeCount, milkCount, syrupCount, extraCount };
 
   // Atualiza Firestore sem apagar os dados antigos
-  const coffeeLogsRef = doc(db, "coffee_logs", "coffee_logs");
+  const coffeeLogsRef = doc(db, "coffee_logs", "dub19downstairs_coffee_logs");
 
   getDoc(coffeeLogsRef)
       .then((docSnap) => {
