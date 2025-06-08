@@ -342,52 +342,73 @@ function restoreCategoryButtons(cat) {
     const hdr = findCategoryHeader(cat);
     if (hdr) hdr.style.display = 'block';
 }
-function showRemoveButton(cat) {
+function showRemoveButton(cat, label) {
     const id = `remove-${cat}-btn`;
     if (document.getElementById(id)) return;
+
     const btn = document.createElement('button');
     btn.id = id;
-    btn.textContent = `Deselect ${cat.charAt(0).toUpperCase() + cat.slice(1)}`;
-    btn.className = 'button full-width';
+    btn.textContent = label;
+    btn.className = 'button full-width selected'; // preserve selected look
     btn.style.marginTop = '10px';
     btn.style.zIndex = '999';
+
     btn.onclick = () => {
         restoreCategoryButtons(cat);
         btn.remove();
         document.querySelectorAll(`.button.${cat}`).forEach(b => b.classList.remove('selected'));
         if (cat === 'coffee') selectedCoffee = '';
         if (cat === 'milk')   selectedMilk   = '';
+        if (cat === 'syrup')  selectedSyrup  = '';
+        if (cat === 'extra')  selectedExtra  = '';
     };
-    document.querySelector('.options').firstElementChild.insertAdjacentElement('afterend', btn);
-}
 
+    const order = ['coffee', 'milk', 'syrup', 'extra'];
+    const container = document.querySelector('.options');
 
-// Select and unselect coffee options
-function selectOption(option, category, buttonElement) {
-    if (buttonElement.classList.contains('selected')) {
-        buttonElement.classList.remove('selected');
-        if (category === 'coffee') selectedCoffee = '';
-        if (category === 'milk')   selectedMilk   = '';
-        if (category === 'syrup')  selectedSyrup  = '';
-        if (category === 'extra')  selectedExtra  = '';
+    // Find the last existing remove button in correct order
+    let lastExisting = null;
+    for (const c of order) {
+        const existing = document.getElementById(`remove-${c}-btn`);
+        if (existing) lastExisting = existing;
+        if (c === cat) break;
+    }
+
+    if (lastExisting) {
+        lastExisting.insertAdjacentElement('afterend', btn);
     } else {
-        document.querySelectorAll(`.button.${category}`).forEach(btn => btn.classList.remove('selected'));
-        buttonElement.classList.add('selected');
-
-        if (category === 'coffee') {
-            selectedCoffee = option;
-            hideCategoryButtons('coffee');
-            showRemoveButton('coffee');
-        }
-        if (category === 'milk') {
-            selectedMilk = option;
-            hideCategoryButtons('milk');
-            showRemoveButton('milk');
-        }
-        if (category === 'syrup')  selectedSyrup = option;
-        if (category === 'extra')  selectedExtra = option;
+        const header = container.querySelector('.header');
+        header.insertAdjacentElement('afterend', btn);
     }
 }
+
+
+
+
+function selectOption(value, category, button) {
+    document.querySelectorAll(`.button.${category}`).forEach(btn => btn.classList.remove('selected'));
+    button.classList.add('selected');
+
+    if (category === 'coffee') {
+        selectedCoffee = value;
+        hideCategoryButtons('coffee');
+        showRemoveButton('coffee', value);
+    } else if (category === 'milk') {
+        selectedMilk = value;
+        hideCategoryButtons('milk');
+        showRemoveButton('milk', value);
+    } else if (category === 'syrup') {
+        selectedSyrup = value;
+        hideCategoryButtons('syrup');
+        showRemoveButton('syrup', value);
+    } else if (category === 'extra') {
+        selectedExtra = value;
+        hideCategoryButtons('extra');
+        showRemoveButton('extra', value);
+    }
+}
+
+
 const apiKey = 'YOUR_API_KEY'; // Replace with your OpenWeatherMap API key
 const city = 'Dublin';
 const url = `https://api.openweathermap.org/data/2.5/weather?q=Dublin&appid=604b3b10dc1bd50d0c79ac19718d5c7e&units=metric`;
