@@ -77,6 +77,7 @@ function addCoffee() {
     saveCoffeeList();
     resetSelections();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.querySelectorAll('button[id^="remove-"][id$="-btn"]').forEach(btn => btn.click());
 }
 
 // Reset coffee selection choices
@@ -98,7 +99,9 @@ function updateCoffeeList() {
     coffeeListElement.innerHTML = ''; // Clear current list
 
     // Display count and date for selected coffees
-    coffeeCountElement.textContent = `Coffees on ${selectedDate} - Total: ${coffeeList.length}`;
+    const validCoffees = coffeeList.filter(coffee => coffee.coffee !== 'No Coffee Selected');
+    coffeeCountElement.textContent = `Coffees on ${selectedDate} - Total: ${validCoffees.length}`;
+
 
     const recentCoffees = coffeeList.slice(-999).reverse(); // Get the most recent coffees
 
@@ -317,21 +320,72 @@ function refreshIfOutdated() {
 setInterval(refreshIfOutdated, 360000);
 
 
+// === helper to grab the <h2> header for each category ================
+function findCategoryHeader(cat) {
+    const firstBtn = document.querySelector(`.button.${cat}`);
+    if (!firstBtn) return null;
+    let el = firstBtn.previousElementSibling;
+    while (el && el.tagName !== 'H2') el = el.previousElementSibling;
+    return el;
+}
+// =====================================================================
+
+
+// === visibility helpers =============================================
+function hideCategoryButtons(cat) {
+    document.querySelectorAll(`.button.${cat}`).forEach(btn => btn.style.display = 'none');
+    const hdr = findCategoryHeader(cat);
+    if (hdr) hdr.style.display = 'none';
+}
+function restoreCategoryButtons(cat) {
+    document.querySelectorAll(`.button.${cat}`).forEach(btn => btn.style.display = 'inline-block');
+    const hdr = findCategoryHeader(cat);
+    if (hdr) hdr.style.display = 'block';
+}
+function showRemoveButton(cat) {
+    const id = `remove-${cat}-btn`;
+    if (document.getElementById(id)) return;
+    const btn = document.createElement('button');
+    btn.id = id;
+    btn.textContent = `Deselect ${cat.charAt(0).toUpperCase() + cat.slice(1)}`;
+    btn.className = 'button full-width';
+    btn.style.marginTop = '10px';
+    btn.style.zIndex = '999';
+    btn.onclick = () => {
+        restoreCategoryButtons(cat);
+        btn.remove();
+        document.querySelectorAll(`.button.${cat}`).forEach(b => b.classList.remove('selected'));
+        if (cat === 'coffee') selectedCoffee = '';
+        if (cat === 'milk')   selectedMilk   = '';
+    };
+    document.querySelector('.options').firstElementChild.insertAdjacentElement('afterend', btn);
+}
+
+
 // Select and unselect coffee options
 function selectOption(option, category, buttonElement) {
     if (buttonElement.classList.contains('selected')) {
         buttonElement.classList.remove('selected');
         if (category === 'coffee') selectedCoffee = '';
-        if (category === 'milk') selectedMilk = '';
-        if (category === 'syrup') selectedSyrup = '';
-        if (category === 'extra') selectedExtra = '';
+        if (category === 'milk')   selectedMilk   = '';
+        if (category === 'syrup')  selectedSyrup  = '';
+        if (category === 'extra')  selectedExtra  = '';
     } else {
         document.querySelectorAll(`.button.${category}`).forEach(btn => btn.classList.remove('selected'));
         buttonElement.classList.add('selected');
-        if (category === 'coffee') selectedCoffee = option;
-        if (category === 'milk') selectedMilk = option;
-        if (category === 'syrup') selectedSyrup = option;
-        if (category === 'extra') selectedExtra = option;
+
+        if (category === 'coffee') {
+            selectedCoffee = option;
+            hideCategoryButtons('coffee');
+            showRemoveButton('coffee');
+        }
+        if (category === 'milk') {
+            selectedMilk = option;
+            hideCategoryButtons('milk');
+            showRemoveButton('milk');
+        }
+        if (category === 'syrup')  selectedSyrup = option;
+        if (category === 'extra')  selectedExtra = option;
     }
 }
 const apiKey = 'YOUR_API_KEY'; // Replace with your OpenWeatherMap API key
