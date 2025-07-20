@@ -1,10 +1,20 @@
+// =============================================================
 // Global variables for selected coffee details
+// =============================================================
 let selectedCoffee = '';
 let selectedMilk = '';
 let selectedSyrup = '';
 let selectedExtra = '';
 let coffeeList = [];
 let selectedDate = getFormattedDate(new Date()); // Initialize selectedDate to today’s date
+let coffeeMultiplier = 1;
+
+
+// === NEW: quantity control state ==========================================
+// Persist between reloads; default 1.
+let coffeeQuantity = parseInt(localStorage.getItem('coffeeQty') || '1', 10);
+if (isNaN(coffeeQuantity) || coffeeQuantity < 1) coffeeQuantity = 1;
+// ==========================================================================
 
 
 // Load the saved coffee list for the current day when the page is loaded
@@ -14,18 +24,40 @@ window.onload = function() {
     updateDateDropdown();
     updateCoffeeList();
 
+    // Init quantity controls (must run after DOM is ready & after addCoffee btn exists)
+    initQuantityControls();
+
     // Check for the reset success flag
     if (localStorage.getItem('resetSuccess') === 'true') {
         alert("All coffee lists have been reset successfully.");
         // Remove the flag so it doesn't show again
         localStorage.removeItem('resetSuccess');
     }
+    document.getElementById('incrementBtn').addEventListener('click', () => {
+    coffeeMultiplier++;
+    document.getElementById('coffeeMultiplier').textContent = coffeeMultiplier;
+});
+
+document.getElementById('decrementBtn').addEventListener('click', () => {
+    if (coffeeMultiplier > 1) {
+        coffeeMultiplier--;
+        document.getElementById('coffeeMultiplier').textContent = coffeeMultiplier;
+    }
+});
+
+document.getElementById('resetMultiplierBtn').addEventListener('click', () => {
+    coffeeMultiplier = 1;
+    document.getElementById('coffeeMultiplier').textContent = coffeeMultiplier;
+});
+
 };
+
 document.addEventListener("keydown", function(event) {
     if (event.key === "Enter" && event.target.tagName !== "TEXTAREA") {
       event.preventDefault();
     }
-  });
+});
+
 // Function to get date in DD/MM/YYYY format
 function getFormattedDate(date) {
     const day = String(date.getDate()).padStart(2, '0');
@@ -61,18 +93,30 @@ const messageElement = document.getElementById('oldListMessage');
 messageElement.style.display = (date === today) ? 'none' : 'block';
 }
 
-// Add a new coffee entry to the list
+// =============================================================
+// Add a new coffee entry to the list (supports quantity)
+// =============================================================
 function addCoffee() {
-    const coffeeDetails = {
-        coffee: selectedCoffee || 'No Coffee Selected',
-        milk: selectedMilk || 'Regular Milk',
-        syrup: selectedSyrup || 'No Syrup',
-        extra: selectedExtra || 'No Extra',
-        time: new Date().toLocaleTimeString(),
-        backgroundColor: 'rgba(255, 202, 111, 0.26)'
-    };
+    const qty = coffeeQuantity; // snapshot so user can change meanwhile without affecting current add
+    if (qty < 1) return; // nothing to add
 
-    coffeeList.push(coffeeDetails); // Add new coffee to list
+    const nowTime = new Date().toLocaleTimeString();
+
+    for (let i = 0; i < qty; i++) {
+        const coffeeDetails = {
+            coffee: selectedCoffee || 'No Coffee Selected',
+            milk: selectedMilk || 'Regular Milk',
+            syrup: selectedSyrup || 'No Syrup',
+            extra: selectedExtra || 'No Extra',
+            time: nowTime,
+            backgroundColor: 'rgba(255, 202, 111, 0.26)'
+        };
+        for (let i = 0; i < coffeeMultiplier; i++) {
+    coffeeList.push({ ...coffeeDetails });
+}
+
+    }
+
     updateCoffeeList();
     saveCoffeeList();
     resetSelections();
@@ -562,3 +606,96 @@ function exportData() {
     document.body.appendChild(link);
     link.click();
 }
+
+
+// =====================================================================
+// NEW: Quantity Controls UI + Logic
+// =====================================================================
+function initQuantityControls() {
+    // Try to locate the existing Enter/Add Coffee button.
+    // Update this selector if your markup differs.
+    const enterBtn = document.getElementById('enterBtn') || document.querySelector('[data-enter-btn]') || document.querySelector('#enter') || null;
+    if (!enterBtn) return; // give up silently if not found
+
+    // Wrapper
+    const wrap = document.createElement('div');
+    wrap.id = 'qtyControls';
+    wrap.style.marginTop = '10px';
+    wrap.style.display = 'flex';
+    wrap.style.alignItems = 'center';
+    wrap.style.gap = '6px';
+    wrap.style.flexWrap = 'wrap';
+
+    // Minus
+    const minusBtn = document.createElement('button');
+    minusBtn.type = 'button';
+    minusBtn.textContent = '-';
+    minusBtn.style.padding = '4px 10px';
+    minusBtn.onclick = decQty;
+
+    // Display
+    const disp = document.createElement('span');
+    disp.id = 'qtyDisplay';
+    disp.style.minWidth = '2ch';
+    disp.style.textAlign = 'center';
+    disp.style.fontWeight = 'bold';
+
+    // Plus
+    const plusBtn = document.createElement('button');
+    plusBtn.type = 'button';
+    plusBtn.textContent = '+';
+    plusBtn.style.padding = '4px 10px';
+    plusBtn.onclick = incQty;
+
+    // Reset
+    const resetBtn = document.createElement('button');
+    resetBtn.type = 'button';
+    resetBtn.textContent = 'reset';
+    resetBtn.style.padding = '4px 10px';
+    resetBtn.onclick = resetQty;
+
+    // Inject
+    wrap.appendChild(minusBtn);
+    wrap.appendChild(disp);
+    wrap.appendChild(plusBtn);
+    wrap.appendChild(resetBtn);
+
+    // Insert after enterBtn
+    enterBtn.insertAdjacentElement('afterend', wrap);
+
+    // initial render
+    renderQty();
+}
+
+function renderQty() {
+    const disp = document.getElementById('qtyDisplay');
+    if (disp) disp.textContent = coffeeQuantity;
+}
+
+function persistQty() {
+    localStorage.setItem('coffeeQty', String(coffeeQuantity));
+}
+
+function incQty() {
+    coffeeQuantity += 1;
+    persistQty();
+    renderQty();
+}
+
+function decQty() {
+    if (coffeeQuantity > 0) {
+        coffeeQuantity -= 1;
+        persistQty();
+        renderQty();
+    }
+}
+
+function resetQty() {
+    coffeeQuantity = 1;
+    persistQty();
+    renderQty();
+}
+
+// =====================================================================
+// END quantity control additions
+// =====================================================================

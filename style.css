@@ -199,3 +199,37 @@ label {
     color: blue;
     font-size: 25px;
 }
+
+/* === Multi Coffee Controls === */
+#multiAddControls {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#multiAddControls button {
+    width: 120px;
+    height: 60px;
+    font-size: 16px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #f5c16c;
+    color: #000;
+    transition: background-color 0.2s ease;
+}
+
+#multiAddControls button:hover {
+    background-color: #e1ad4c;
+}
+
+#multiAddControls #resetMultiplierBtn {
+    width: 80px;
+    margin-left: 10px;
+}
+
+#multiAddControls span {
+    font-weight: bold;
+    font-size: 18px;
+}

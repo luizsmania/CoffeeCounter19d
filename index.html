@@ -81,6 +81,14 @@
         </select>
         <p id="oldListMessage" class="oldListMessage" style="color: red; display: none;">Looks like you're checking out yesterday's coffee run. Switch to today's date to see the fresh brew!</p>
         <button id="added" class="button full-width" onclick="addCoffee()">Enter</button>
+<div id="multiAddControls">
+    <button id="decrementBtn" class="button">-</button>
+    <span id="coffeeMultiplier">1</span>
+    <button id="incrementBtn" class="button">+</button>
+    <button id="resetMultiplierBtn" class="button">Reset</button>
+</div>
+
+
         <h2 id="coffeeCount">Recent Coffees - Total: 0</h2>
         <ul id="coffeeList"></ul>
     </div>
