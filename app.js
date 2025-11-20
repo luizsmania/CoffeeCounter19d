@@ -455,7 +455,7 @@ function selectOption(value, category, button) {
 
 const apiKey = 'YOUR_API_KEY'; // Replace with your OpenWeatherMap API key
 const city = 'Dublin';
-const url = `https://api.openweathermap.org/data/2.5/weather?q=Dublin&appid=604b3b10dc1bd50d0c79ac19718d5c7e&units=metric`;
+const url = `https://api.openweathermap.org/data/2.5/weather?q=Dublin,IE&appid=604b3b10dc1bd50d0c79ac19718d5c7e&units=metric`;
 
 fetch(url)
     .then(response => {
