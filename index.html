@@ -63,10 +63,12 @@
 	<button class="button extra" onclick="selectOption('Decaff', 'extra', this)">Decaff</button>
        
         <div class="controls">
-            <button class="button full-width" id="exportBtn" onclick="exportData()">Export Data</button>
-            <button class="button full-width" id="exportBtn" onclick="exportCoffeeLists()">Export JSON File. DO NOT USE</button>
-            <button class="button full-width" id="exportFirestore">Export Cloud. DO NOT USE</button>
-            <button class="button full-width" id="uploadBtn" onclick="triggerFileInput()">Upload Coffee Lists. DO NOT USE</button>
+            <button class="button full-width" id="exportBtn" onclick="exportData()">Export Data (CSV)</button>
+            <button class="button full-width" id="uploadFirebaseBtn" onclick="uploadToFirebase()">Upload para Firebase</button>
+            <button class="button full-width" id="downloadFirebaseBtn" onclick="downloadFromFirebase()">Download do Firebase</button>
+            <button class="button full-width" id="exportBtn" onclick="exportCoffeeLists()" style="display: none;">Export JSON File. DO NOT USE</button>
+            <button class="button full-width" id="exportFirestore" style="display: none;">Export Cloud. DO NOT USE</button>
+            <button class="button full-width" id="uploadBtn" onclick="triggerFileInput()" style="display: none;">Upload Coffee Lists. DO NOT USE</button>
             <input type="file" id="fileInput" style="display: none;" onchange="uploadCoffeeLists(event)" />
             
 

@@ -6,15 +6,11 @@ let selectedMilk = '';
 let selectedSyrup = '';
 let selectedExtra = '';
 let coffeeList = [];
-let selectedDate = getFormattedDate(new Date()); // Initialize selectedDate to today’s date
-let coffeeMultiplier = 1;
+let selectedDate = getFormattedDate(new Date()); // Initialize selectedDate to today's date
 
-
-// === NEW: quantity control state ==========================================
-// Persist between reloads; default 1.
+// Consolidated quantity control - persists between reloads
 let coffeeQuantity = parseInt(localStorage.getItem('coffeeQty') || '1', 10);
 if (isNaN(coffeeQuantity) || coffeeQuantity < 1) coffeeQuantity = 1;
-// ==========================================================================
 
 
 // Load the saved coffee list for the current day when the page is loaded
@@ -24,8 +20,8 @@ window.onload = function() {
     updateDateDropdown();
     updateCoffeeList();
 
-    // Init quantity controls (must run after DOM is ready & after addCoffee btn exists)
-    initQuantityControls();
+    // Initialize quantity display
+    updateQuantityDisplay();
 
     // Check for the reset success flag
     if (localStorage.getItem('resetSuccess') === 'true') {
@@ -33,22 +29,27 @@ window.onload = function() {
         // Remove the flag so it doesn't show again
         localStorage.removeItem('resetSuccess');
     }
+    
+    // Quantity control event listeners
     document.getElementById('incrementBtn').addEventListener('click', () => {
-    coffeeMultiplier++;
-    document.getElementById('coffeeMultiplier').textContent = coffeeMultiplier;
-});
+        coffeeQuantity++;
+        persistQuantity();
+        updateQuantityDisplay();
+    });
 
-document.getElementById('decrementBtn').addEventListener('click', () => {
-    if (coffeeMultiplier > 1) {
-        coffeeMultiplier--;
-        document.getElementById('coffeeMultiplier').textContent = coffeeMultiplier;
-    }
-});
+    document.getElementById('decrementBtn').addEventListener('click', () => {
+        if (coffeeQuantity > 1) {
+            coffeeQuantity--;
+            persistQuantity();
+            updateQuantityDisplay();
+        }
+    });
 
-document.getElementById('resetMultiplierBtn').addEventListener('click', () => {
-    coffeeMultiplier = 1;
-    document.getElementById('coffeeMultiplier').textContent = coffeeMultiplier;
-});
+    document.getElementById('resetMultiplierBtn').addEventListener('click', () => {
+        coffeeQuantity = 1;
+        persistQuantity();
+        updateQuantityDisplay();
+    });
 
 };
 
@@ -72,6 +73,9 @@ function loadCoffeeList(date) {
     coffeeList = savedCoffeeList ? JSON.parse(savedCoffeeList) : [];
 }
 
+// Make function globally available for firebase.js
+window.loadCoffeeList = loadCoffeeList;
+
 // Save the coffee list for the current selected date
 function saveCoffeeList() {
     localStorage.setItem(`coffeeList_${selectedDate}`, JSON.stringify(coffeeList));
@@ -80,10 +84,16 @@ function saveCoffeeList() {
 // Change the date based on dropdown selection
 function changeDate(event) {
     selectedDate = event.target.value;
+    console.log(`📅 Data selecionada: ${selectedDate}`);
+    
+    // Carrega a lista do localStorage
     loadCoffeeList(selectedDate);
+    console.log(`📦 Cafés carregados: ${coffeeList.length}`);
+    
+    // Atualiza a exibição
     updateCoffeeList();
     checkDate(selectedDate);
-  }
+}
 
 function checkDate(date) {
 const today = getFormattedDate(new Date());
@@ -102,6 +112,7 @@ function addCoffee() {
 
     const nowTime = new Date().toLocaleTimeString();
 
+    // Add the coffee entry qty times
     for (let i = 0; i < qty; i++) {
         const coffeeDetails = {
             coffee: selectedCoffee || 'No Coffee Selected',
@@ -111,10 +122,7 @@ function addCoffee() {
             time: nowTime,
             backgroundColor: 'rgba(255, 202, 111, 0.26)'
         };
-        for (let i = 0; i < coffeeMultiplier; i++) {
-    coffeeList.push({ ...coffeeDetails });
-}
-
+        coffeeList.push({ ...coffeeDetails });
     }
 
     updateCoffeeList();
@@ -200,6 +208,9 @@ function updateCoffeeList() {
     isDeleted = false;
 }
 
+// Make function globally available for firebase.js
+window.updateCoffeeList = updateCoffeeList;
+
 // Remove a coffee from the list
 function removeCoffee(index) {
     const confirmDelete = confirm("Are you sure you want to delete this coffee?");
@@ -262,6 +273,10 @@ function updateDateDropdown() {
         dropdown.value = currentDate; // Select the current date if it exists
     }
 }
+
+// Make function globally available for firebase.js
+window.updateDateDropdown = updateDateDropdown;
+
 function checkOutdatedList() {
     const outdatedMessage = document.getElementById('outdatedMessage');
     const coffeeCountElement = document.getElementById('coffeeCount');
@@ -453,9 +468,12 @@ function selectOption(value, category, button) {
 }
 
 
-const apiKey = 'YOUR_API_KEY'; // Replace with your OpenWeatherMap API key
+// API Configuration
+// WARNING: API keys should not be exposed in client-side code in production
+// For production, use a backend proxy to protect your API key
+const WEATHER_API_KEY = '604b3b10dc1bd50d0c79ac19718d5c7e'; // TODO: Move to backend proxy
 const city = 'Dublin';
-const url = `https://api.openweathermap.org/data/2.5/weather?q=Dublin,IE&appid=604b3b10dc1bd50d0c79ac19718d5c7e&units=metric`;
+const url = `https://api.openweathermap.org/data/2.5/weather?q=${city},IE&appid=${WEATHER_API_KEY}&units=metric`;
 
 fetch(url)
     .then(response => {
@@ -609,93 +627,21 @@ function exportData() {
 
 
 // =====================================================================
-// NEW: Quantity Controls UI + Logic
+// Quantity Control Helpers
 // =====================================================================
-function initQuantityControls() {
-    // Try to locate the existing Enter/Add Coffee button.
-    // Update this selector if your markup differs.
-    const enterBtn = document.getElementById('enterBtn') || document.querySelector('[data-enter-btn]') || document.querySelector('#enter') || null;
-    if (!enterBtn) return; // give up silently if not found
-
-    // Wrapper
-    const wrap = document.createElement('div');
-    wrap.id = 'qtyControls';
-    wrap.style.marginTop = '10px';
-    wrap.style.display = 'flex';
-    wrap.style.alignItems = 'center';
-    wrap.style.gap = '6px';
-    wrap.style.flexWrap = 'wrap';
-
-    // Minus
-    const minusBtn = document.createElement('button');
-    minusBtn.type = 'button';
-    minusBtn.textContent = '-';
-    minusBtn.style.padding = '4px 10px';
-    minusBtn.onclick = decQty;
-
-    // Display
-    const disp = document.createElement('span');
-    disp.id = 'qtyDisplay';
-    disp.style.minWidth = '2ch';
-    disp.style.textAlign = 'center';
-    disp.style.fontWeight = 'bold';
-
-    // Plus
-    const plusBtn = document.createElement('button');
-    plusBtn.type = 'button';
-    plusBtn.textContent = '+';
-    plusBtn.style.padding = '4px 10px';
-    plusBtn.onclick = incQty;
-
-    // Reset
-    const resetBtn = document.createElement('button');
-    resetBtn.type = 'button';
-    resetBtn.textContent = 'reset';
-    resetBtn.style.padding = '4px 10px';
-    resetBtn.onclick = resetQty;
-
-    // Inject
-    wrap.appendChild(minusBtn);
-    wrap.appendChild(disp);
-    wrap.appendChild(plusBtn);
-    wrap.appendChild(resetBtn);
-
-    // Insert after enterBtn
-    enterBtn.insertAdjacentElement('afterend', wrap);
-
-    // initial render
-    renderQty();
-}
-
-function renderQty() {
-    const disp = document.getElementById('qtyDisplay');
-    if (disp) disp.textContent = coffeeQuantity;
-}
-
-function persistQty() {
-    localStorage.setItem('coffeeQty', String(coffeeQuantity));
-}
-
-function incQty() {
-    coffeeQuantity += 1;
-    persistQty();
-    renderQty();
-}
-
-function decQty() {
-    if (coffeeQuantity > 0) {
-        coffeeQuantity -= 1;
-        persistQty();
-        renderQty();
+function updateQuantityDisplay() {
+    const display = document.getElementById('coffeeMultiplier');
+    if (display) {
+        display.textContent = coffeeQuantity;
     }
 }
 
-function resetQty() {
-    coffeeQuantity = 1;
-    persistQty();
-    renderQty();
+function persistQuantity() {
+    localStorage.setItem('coffeeQty', String(coffeeQuantity));
 }
 
 // =====================================================================
-// END quantity control additions
+// Firebase Integration Functions
 // =====================================================================
+// As funções uploadToFirebase() e downloadFromFirebase() estão definidas
+// globalmente no firebase.js para acesso direto do HTML
