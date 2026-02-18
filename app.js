@@ -503,10 +503,38 @@ fetch(url)
         console.error("Error fetching weather data:", error);
     });
 
-// Reload the page every 2 hours (7200000 milliseconds)
-setTimeout(() => {
-    location.reload();
-}, 7200000); // 2 hours in milliseconds == 7200000
+function scheduleReload() {
+    const now = new Date();
+    const minutes = now.getMinutes();
+
+    // Check if we're in the allowed minute window (:20–:55)
+    if (minutes >= 20 && minutes <= 55) {
+        // Reload after 2 hours
+        setTimeout(() => {
+            location.reload();
+        }, 7200000);
+    } else {
+        // Calculate delay until next :20 minute mark
+        let next = new Date(now);
+
+        if (minutes < 20) {
+            next.setMinutes(20, 0, 0);
+        } else {
+            // minutes > 55 → go to next hour at :20
+            next.setHours(next.getHours() + 1);
+            next.setMinutes(20, 0, 0);
+        }
+
+        const delay = next - now;
+
+        setTimeout(() => {
+            scheduleReload(); // Re-check once we hit allowed window
+        }, delay);
+    }
+}
+
+// Start scheduling
+scheduleReload();
 
 /// Function to export all coffee lists to a JSON file
 function exportCoffeeLists() {
